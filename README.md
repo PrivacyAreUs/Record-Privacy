@@ -37,7 +37,7 @@ You need a user script manager installed in your browser. Recommended options:
    - Confirm that `Record` is listed and enabled (toggle should be ON).
    - Visit [Discord](https://discord.com) in your browser to ensure the script is active. No further setup is required!
 
-## 🔄 Updates
+## Updates
 - The script supports **automatic updates** via the `@updateURL` metadata.
 - Your script manager will check for updates periodically from the GitHub repository.
 - To manually update, revisit the [install link](https://github.com/PrivacyAreUs/Record-Privacy/raw/refs/heads/main/src/Record.user.js) and reinstall.
