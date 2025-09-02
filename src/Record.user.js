@@ -3,13 +3,19 @@
 // @namespace    http://tampermonkey.net/
 // @version      1.0
 // @description  Stop Discord spying via fingerprinting, tracking icons, science endpoints, Sentry, and third-party embeds
-// @author       Tyrant
-// @match        https://discord.com/*
+// @author       PrivacyAre.Us
+// @match        *://*.discord.com/*
 // @grant        GM_xmlhttpRequest
 // @connect      open.spotify.com
 // @grant        none
+// @compatible   chrome Chrome + Tampermonkey or Violentmonkey
+// @compatible   firefox Firefox + Tampermonkey
+// @compatible   opera Opera + Tampermonkey or Violentmonkey
+// @compatible   edge Edge + Tampermonkey or Violentmonkey
+// @compatible   safari Safari + Tampermonkey or Violentmonkey
+// @updateURL    https://github.com/PrivacyAreUs/Record-Privacy/raw/refs/heads/main/src/Record.user.js
+// @downloadURL  https://github.com/PrivacyAreUs/Record-Privacy/raw/refs/heads/main/src/Record.user.js
 // ==/UserScript==
-
 (function() {
     'use strict';
 
@@ -134,7 +140,7 @@
         });
     }
 
-    // Replace YouTube and Twitter/X links in message content (not finished)
+    // Replace YouTube and Twitter/X links in message content
     function replaceLinksInMessage(content) {
         // YouTube to Invidious (yewtu.be)
         content = content.replace(/(https?:\/\/)(?:www\.)?(?:youtube\.com\/watch\?(?:.*&)?v=|youtu\.be\/)([a-zA-Z0-9_-]+)(?:[?&][^\s]*)?/g, '$1yewtu.be/watch?v=$2');
@@ -168,7 +174,7 @@
         };
     }
 
-    // Block WebGL fingerprinting (added a while ago)
+    // Block WebGL fingerprinting
     function blockWebGLFingerprinting() {
         const originalGetContext = HTMLCanvasElement.prototype.getContext;
         HTMLCanvasElement.prototype.getContext = function(contextType) {
@@ -183,7 +189,7 @@
     const CUSTOM_FAVICON = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAH0lEQVR42mNgwAL8//8/AwMDEwODAwPD/wMDw3AAAIgAZc5o3oIAAAAASUVORK5CYII=';
 
     function replaceFavicon() {
-        const faviconLinks = document.querySelectorAll('link[rel="icon"], link[rel="apple-touch-icon"], link[rel="mask-icon"],');
+        const faviconLinks = document.querySelectorAll('link[rel="icon"], link[rel="apple-touch-icon"], link[rel="mask-icon"]');
         faviconLinks.forEach(link => link.remove());
 
         const newFavicon = document.createElement('link');
@@ -197,8 +203,10 @@
         blockTrackingEndpoints();
         blockWebGLFingerprinting();
         replaceEmbeds();
-        replaceFavicon();
-        const observer = new MutationObserver(mutations => {
+        // replaceFavicon();
+
+        // Monitor favicon changes
+        const faviconObserver = new MutationObserver(mutations => {
             mutations.forEach(mutation => {
                 mutation.addedNodes.forEach(node => {
                     if (node.nodeName === 'LINK' && (node.rel === 'mask-icon' || node.rel === 'apple-touch-icon' || node.rel === 'icon')) {
@@ -211,13 +219,15 @@
                 });
             });
         });
-        observer.observe(document.head, {
+        faviconObserver.observe(document.head, {
             childList: true
         });
-        const observer = new MutationObserver(mutations => {
+
+        // Monitor embed changes
+        const embedObserver = new MutationObserver(mutations => {
             mutations.forEach(m => replaceEmbeds(m.target));
         });
-        observer.observe(document.body, {
+        embedObserver.observe(document.body, {
             childList: true,
             subtree: true
         });
